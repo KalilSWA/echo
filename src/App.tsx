@@ -3,28 +3,38 @@ import { io, Socket } from "socket.io-client";
 import { Impact } from "./factory/impactsGen";
 import { Session } from "./factory/session";
 import { useState } from "react";
-const apiToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODEwODc2NTAsImV4cCI6MTY4MTY5MjQ1MH0.Xz414lPQhfNfokW1J96Y3A5U2OWPXFyEO8oC1AtfLyE";
-const output = {
-  timestamp: Date.now(),
-  ImpactID: "123123",
-  SensorID: "23423423",
-  data: {
-    data: "ss",
-  },
-};
-//@ts-ignore
-const socket: Socket = io.connect("http://protecht:10010", {
-  namespaces: ["/"],
-  headers: {
-    auth: apiToken,
-    "user-agent": "PROTECHT Receiver App",
-  },
-});
-let impactInputs: string[] = Impact.inputs;
-let sessionInput: string[] = Session.sessionInputs;
-
 function App(): any {
+  const [impact, setImpact] = useState({
+    Impacts: "",
+    Zscore: "",
+    ang_rotation: "",
+  });
+
+  // const apiToken =
+  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODIyNzg4MzYsImV4cCI6MTY4Mjg4MzYzNn0.5noKNdCrx6QbDKjQZH42DclVeLFrQeiFSuFO1s5Yyew";
+  const output = {
+    timestamp: Date.now(),
+    ImpactID: "123123",
+    SensorID: "23423423",
+    data: {
+      data: impact,
+    },
+  };
+  //@ts-ignore
+  const socket: Socket = io.connect(
+    "http://localhost:6003"
+
+    // , {
+    //   namespaces: ["/"],
+    //   headers: {
+    //     auth: apiToken,
+    //     "user-agent": "PROTECHT Receiver App",
+    //   },
+    // }
+  );
+  let impactInputs: string[] = Impact.inputs;
+  let sessionInput: string[] = Session.sessionInputs;
+
   const [session, setSession] = useState({
     session_ID: "",
     Duration: "",
@@ -32,11 +42,6 @@ function App(): any {
     sport: "",
   });
 
-  const [impact, setImpact] = useState({
-    Impacts: "",
-    Zscore: "",
-    ang_rotation: "",
-  });
   const SendImpact = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(impact);
