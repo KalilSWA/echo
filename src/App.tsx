@@ -3,6 +3,13 @@ import { io, Socket } from "socket.io-client";
 import { Impact } from "./factory/impactsGen";
 import { Session } from "./factory/session";
 import { useState } from "react";
+let data = {
+  timestamp: new Date(),
+  ImpactID: 510,
+  SensorID: "01C0B47F45AD6182",
+  data: [],
+  guardImpactID: "01CDD3103FD90DE5",
+};
 function App(): any {
   const [impact, setImpact] = useState({
     Impacts: "",
@@ -10,8 +17,8 @@ function App(): any {
     ang_rotation: "",
   });
 
-  // const apiToken =
-  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODIyNzg4MzYsImV4cCI6MTY4Mjg4MzYzNn0.5noKNdCrx6QbDKjQZH42DclVeLFrQeiFSuFO1s5Yyew";
+  const apiToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODM3MjcwNDMsImV4cCI6MTY4NDMzMTg0M30.ddTvg1-TedjGSOJU3cu_VTTszrzn01-y748CVdvKFYw";
   const output = {
     timestamp: Date.now(),
     ImpactID: "123123",
@@ -22,15 +29,14 @@ function App(): any {
   };
   //@ts-ignore
   const socket: Socket = io.connect(
-    "http://localhost:6003"
+    "http://localhost:10010/",
 
-    // , {
-    //   namespaces: ["/"],
-    //   headers: {
-    //     auth: apiToken,
-    //     "user-agent": "PROTECHT Receiver App",
-    //   },
-    // }
+    {
+      namespaces: ["/"],
+      path: "/socket.io",
+      query: { token: apiToken },
+      transports: ["websocket"],
+    }
   );
   let impactInputs: string[] = Impact.inputs;
   let sessionInput: string[] = Session.sessionInputs;
@@ -45,6 +51,14 @@ function App(): any {
   const SendImpact = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(impact);
+    const output = {
+      timestamp: Date.now(),
+      ImpactID: "123123",
+      SensorID: "23423423",
+      data: {
+        data: impact,
+      },
+    };
     socket.emit("data", output);
   };
 
