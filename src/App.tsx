@@ -1,17 +1,20 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { Impact } from "./factory/impactsGen";
 import { Session } from "./factory/session";
-import { useState } from "react";
-function App(): any {
+
+function App() {
   const [impact, setImpact] = useState({
     Impacts: "",
     Zscore: "",
     ang_rotation: "",
   });
 
-  // const apiToken =
-  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODIyNzg4MzYsImV4cCI6MTY4Mjg4MzYzNn0.5noKNdCrx6QbDKjQZH42DclVeLFrQeiFSuFO1s5Yyew";
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  const apiToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImNsdWIiOiJzeXN0ZW10d29tbWEiLCJpYXQiOjE2ODM2Mzg1MzMsImV4cCI6MTY4NDI0MzMzM30.HNR9qcO-24bvBXnbHdtL6Qtqq4ibibOH_heHLEhtxJo";
   const output = {
     timestamp: Date.now(),
     ImpactID: "123123",
@@ -20,18 +23,30 @@ function App(): any {
       data: impact,
     },
   };
-  //@ts-ignore
-  const socket: Socket = io.connect(
-    "http://localhost:6003"
 
-    // , {
-    //   namespaces: ["/"],
-    //   headers: {
-    //     auth: apiToken,
-    //     "user-agent": "PROTECHT Receiver App",
-    //   },
-    // }
-  );
+  useEffect(() => {
+    //@ts-ignore
+    const newSocket = io.connect("http://protecht:10010", {
+      namespaces: ["/"],
+
+      headers: {
+        Authorization: "Bearer " + apiToken,
+        "user-agent": "PROTECHT Receiver App",
+      },
+    });
+    newSocket.on("connect", () => {
+      newSocket.emit("room", "123123");
+      console.log("connection has been established");
+    });
+
+    setSocket(newSocket);
+
+    // Disconnect when the component unmounts
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []); // Empty array means this effect runs once on mount and clean up on unmount
+
   let impactInputs: string[] = Impact.inputs;
   let sessionInput: string[] = Session.sessionInputs;
 
@@ -45,7 +60,7 @@ function App(): any {
   const SendImpact = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(impact);
-    socket.emit("data", output);
+    socket?.emit("data", output);
   };
 
   const handleImpactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
